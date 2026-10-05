@@ -292,13 +292,19 @@ function PerformanceView(options) {
         var order = all.filter(function (i) { return !hidden[i] })
         var hiddenCount = all.length - order.length
         var key = boardKey()
-        var boardChanged = key !== builtFor
+        var plugins = pb.data('plugins') || {}
+        // A pedalboard load swaps every plugin, and the bundle name may update
+        // before or after the new plugins arrive. Treat "none of the pedals we
+        // were showing survived" as a board change too.
+        var survivors = slides.filter(function (s) {
+            return !s.tile && s.icon && plugins[s.instance] && plugins[s.instance][0] === s.icon[0]
+        }).length
+        var boardChanged = key !== builtFor || (slides.some(function (s) { return !s.tile }) && survivors === 0)
         builtFor = key
         // a different pedalboard starts again at its first pedal, even if it
         // happens to use the same instance names
         var prevInstance = !boardChanged && active >= 0 && slides[active] ? slides[active].instance : null
         var prevIndex = boardChanged ? -1 : active
-        var plugins = pb.data('plugins') || {}
         var byInstance = {}
         slides.forEach(function (s) { if (!s.tile) byInstance[s.instance] = s })
 

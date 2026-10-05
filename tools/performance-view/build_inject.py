@@ -23,12 +23,19 @@ markup = '''<div id="performance-view" style="display:none">
 out = '''/*
  * MOD UI performance view: test build.
  *
- * Paste this whole file into the browser console (or run it as a
- * bookmarklet) on your MOD's web UI, e.g. http://192.168.51.1/
+ * Either paste this whole file into the browser console on your MOD's web
+ * UI (e.g. http://192.168.51.1/; reload the page and it's gone), or copy it
+ * to the device as html/js/performance-inject.js and load it from
+ * index.html with a <script> tag just before </body>.
  * A lightning bolt appears next to the puzzle icon, bottom left.
- * Nothing is installed on the device: reload the page and it's gone.
  */
 (function () {
+  // Works both pasted into the console and loaded from index.html (where it
+  // must wait for the page's own ready handler to create `desktop`).
+  var start = function () {
+    if (!window.desktop || !desktop.pedalboard) {
+        return setTimeout(start, 100)
+    }
     if (document.getElementById('performance-view')) {
         console.log('Performance view is already loaded')
         return
@@ -85,6 +92,8 @@ out = '''/*
     })
     $('#main-menu #mod-performance').statusTooltip()
     console.log('Performance view loaded: tap the lightning bolt, bottom left')
+  }
+  $(start)
 })();
 ''' % {'css': json.dumps(css), 'markup': json.dumps(markup), 'js': js}
 
